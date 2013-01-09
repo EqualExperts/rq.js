@@ -1,0 +1,7 @@
+load('ctrl_rq.js')
+db.rqQueries.find()
+findWithTag("dtg_reviews","findByProvider",{"provider":"Zoover"})
+load('ctrl_rq.js')
+findWithTag("dtg_reviews","findByProvider",{"provider":"Zoover"})
+load('ctrl_rq.js')
+findWithTag("dtg_reviews","findByProvider",{"provider":"Zoover"})

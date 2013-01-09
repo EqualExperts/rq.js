@@ -17,7 +17,7 @@ value = value.replace(PARAM,'');
 query[key] = param[value];
 }
 }
-var command = "db.getCollection('" + collection + "').find(" + JSON.stringify(query) + ")";
+var command = "db.getCollection('" + collection + "').find(query)";
 print(command);
 var cursor = eval(command);
 var count = 0;
