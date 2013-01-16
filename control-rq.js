@@ -540,12 +540,11 @@ var findWithTag = function (collection, tag, param) {
 var substitueParam = function (jsonObject, param) {
     for (var key in jsonObject) {
         var value = jsonObject[key];
-        //   print("printing map");
         //  printjson({"key": key, "value": value});
         if (typeof value == "object")
             jsonObject[key] = substitueParam(value, param);
-        else if (value.indexOf(PARAM) == 0) {
-            value = value.replace(PARAM, '');
+        else if (value.toString().indexOf(PARAM) == 0) {
+            value = value.toString().replace(PARAM, '');
             jsonObject[key] = param[value];
         }
     }
