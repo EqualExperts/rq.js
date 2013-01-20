@@ -4,6 +4,7 @@ var QUERY_COLLECTION = "rquery";
 var DESCRIPTION = "desc";
 var TAG = "tag";
 var QUERY = "query";
+var QUERY_ON_COLLECTION = "onCollection";
 var PARAM = '%';
 var BATCH_SIZE = 10;
 
@@ -26,20 +27,18 @@ var init = function () {
         if (desciption != undefined && desciption != null)
             print("\t- " + desciption);
     }
-    print("Done.\n");
+    print("Done.");
 };
 
-var findWithTag = function (collection, tag, param) {
+var findWithTag = function (tag, param) {
     var doc = eval("db.getCollection(QUERY_COLLECTION).findOne({ " + TAG + ":tag})");
-    //  print("query = " + doc[QUERY]);
+    // print("query = " + doc[QUERY]);
     if (doc == null) {
         print("No query tagged: " + tag);
         return;
     }
-    var json = JSON.parse(doc[QUERY]);
-    var query = substitueParam(json, param);
-    var strQuery = JSON.stringify(query);
-    var command = "db.getCollection('" + collection + "').find(" + strQuery + ")";
+
+    var command = constructQueryString(doc, param);
     print(command);
     var cursor = eval(command);
     var count = 0;
@@ -50,6 +49,14 @@ var findWithTag = function (collection, tag, param) {
         count++;
     }
 };
+
+var constructQueryString = function (queryDoc, param) {
+    var json = JSON.parse(queryDoc[QUERY]);
+    var query = substitueParam(json, param);
+    var onCollection = queryDoc[QUERY_ON_COLLECTION];
+    var strQuery = JSON.stringify(query);  
+    return "db.getCollection('" + onCollection + "').find(" + strQuery + ")";      
+}
 
 var substitueParam = function (jsonObject, param) {
     for (var key in jsonObject) {
@@ -65,7 +72,7 @@ var substitueParam = function (jsonObject, param) {
     return jsonObject;
 };
 
-var addTaggedQuery = function (tag, query, description, overwrite) {
+var addTaggedQuery = function (tag, query, onCollection, description, overwrite) {
     var existingQuery = eval("db.getCollection(QUERY_COLLECTION).findOne({" + TAG + ":tag})");
     if (existingQuery && existingQuery != null) {
         if (overwrite == undefined || overwrite == false) {
@@ -78,7 +85,8 @@ var addTaggedQuery = function (tag, query, description, overwrite) {
     }
 
     var strQuery = JSON.stringify(query);
-    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY + ": strQuery})");
+    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery})");
+    // eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY + ": strQuery})");
     print("New tag created with name " + tag);
     addQueryToShell(tag);
 };
@@ -96,9 +104,12 @@ var welcomeMessage = "You can now use following functions \n\n"
     + "  - tag : String tag of the already stored query \n"
     + "  - params : JSON params to pass to query (eg. {'name' : 'John', 'age' : 52 })\n \n"
 
-    + "addTaggedQuery(tag, query, desciption, overwrite) \n"
-    + "  - tag : String tag to be used for indentifying the query \n"
-    + "  - query : JSON query \n"
+    + "addTaggedQuery(tag, query, onCollection, desciption, overwrite) \n"
+    + "  - tag:\t String tag to be used for indentifying the query \n"
+    + "  - query:\t JSON query \n"
+    + "  - onCollection:\t to be run on collection \n"
+    + "  - description:\t a line of text on the query \n"
+    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n"            
     + "    You can have parameterized queries with prepending % at the start of the parameter \n"
     + "    (eg. addTaggedQuery('findByName',{'name' : '%name'})) \n\n"
 

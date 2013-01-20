@@ -1,0 +1,29 @@
+# Introduce control-rq.js (begin with the browser displaying the page from github)
+# Explain what it does:
+  "When you have documents with rich structure in mongo, its possible to write powerful queries, that are also lengthy and complicated"
+  "Both you and others on your team working on the same collections can create and re-use commonly-used find queries using control-rq"
+[PAUSE]
+  "The name comes from the 'reverse-search' using Ctrl-R on your bash shell"
+  "In this case, we want to quickly find and run the queries we want"
+  "This utility is released under the terms of the Apache License, and is supported by the kind folks at EqualExperts" ...point to the link to EE...
+
+# Obtain and install
+  "Just download the .zip file using the link, extract it to any chosen location" ...show...
+  "You can now connect to mongo, and load the single JavaScript file like this" ...show...
+[PAUSE]
+  "You can also setup for the mongo client to load the same file at the beginning of each session, by additing it to your .mongorc file"
+
+# Usage
+  "As you can see, this adds some functions you can now call"
+
+  aq 
+Add a tagged query
+
+  rq
+Run a tagged query
+
+  cq
+Clear the named query, or all tagged queries
+
+  lq
+List queries that match the tag, takes wildcards
