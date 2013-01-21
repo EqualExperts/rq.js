@@ -2,6 +2,7 @@ load('json2.js');
 
 var QUERY_COLLECTION = "rquery";
 var PARAM = '%';
+var DEBUG = true;
 
 //properties in the query document
 var DESCRIPTION = "desc";
@@ -11,8 +12,21 @@ var QUERY_ON_COLLECTION = "onCollection";
 
 var SHELL = this;
 
-var addQueryToShell = function (tag) {
-    eval(tag + " =  function (collection, param) {findWithTag(collection, '" + tag + "', param); }");
+var log = function (message) {
+    if (DEBUG) {
+        print(message);
+    }
+}
+
+var setDebugTrue = function () {
+    DEBUG = false;
+}
+
+var addQueryToShell = function (tag, acceptCollection) {
+    if (acceptCollection == true)
+        eval(tag + " =  function (collection, param) {findWithTag(collection, '" + tag + "', param); }");
+    else
+        eval(tag + " =  function ( param) {findWithTag( '" + tag + "', param); }");
 }
 
 var init = function () {
@@ -23,10 +37,15 @@ var init = function () {
         var taggedQuery = cursor.next();
         var tag = taggedQuery[TAG];
         var desciption = taggedQuery[DESCRIPTION];
-        addQueryToShell(tag);
+        var onCollection = taggedQuery[QUERY_ON_COLLECTION];
+        if (onCollection != null)
+            addQueryToShell(tag, false);
+        else
+            addQueryToShell(tag);
         print(tag);
         if (desciption != undefined && desciption != null)
             print(":\t- " + desciption);
+        print("");
     }
     print("Done.");
 };
@@ -34,12 +53,12 @@ var init = function () {
 var findWithTag = function (tag, param) {
     var doc = eval("db.getCollection(QUERY_COLLECTION).findOne({ " + TAG + ":tag})");
     if (doc == null) {
-        print("No query tagged: " + tag);
+        log("No query tagged: " + tag);
         return;
     }
 
     var command = constructQueryString(doc, param);
-    print(command);
+    log(command);
     return eval(command);
 };
 
@@ -47,8 +66,8 @@ var constructQueryString = function (queryDoc, param) {
     var json = JSON.parse(queryDoc[QUERY]);
     var query = substitueParam(json, param);
     var onCollection = queryDoc[QUERY_ON_COLLECTION];
-    var strQuery = JSON.stringify(query);  
-    return "db.getCollection('" + onCollection + "').find(" + strQuery + ")";      
+    var strQuery = JSON.stringify(query);
+    return "db.getCollection('" + onCollection + "').find(" + strQuery + ")";
 };
 
 var substitueParam = function (jsonObject, param) {
@@ -65,23 +84,34 @@ var substitueParam = function (jsonObject, param) {
     return jsonObject;
 };
 
-var addTaggedQuery = function (tag, query, onCollection, description, overwrite) {
+var addTaggedQueryForCollection = function (tag, query, onCollection, description, overwrite) {
+    checkForExistingTag(tag, overwrite);
+    var strQuery = JSON.stringify(query);
+    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
+    // eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY + ": strQuery})");
+    log("New tag created with name " + tag + " for collection " + collection);
+    addQueryToShell(tag);
+};
+
+var checkForExistingTag = function (tag, overwrite) {
     var existingQuery = eval("db.getCollection(QUERY_COLLECTION).findOne({" + TAG + ":tag})");
     if (existingQuery && existingQuery != null) {
         if (overwrite == undefined || overwrite == false) {
-            print("Query tagged " + tag + " is already present.");
+            log("Query tagged " + tag + " is already present.");
             return
         }
         else if (overwrite != undefined && overwrite == true)
-            print("Query tagged " + tag + " will be redefined");
-            eval("db.getCollection(QUERY_COLLECTION).remove({" + TAG + ":tag})");
+            log("Query tagged " + tag + " will be redefined");
+        eval("db.getCollection(QUERY_COLLECTION).remove({" + TAG + ":tag})");
     }
+}
 
+var addTaggedQuery = function (tag, query, description, overwrite) {
+    checkForExistingTag(tag, overwrite);
     var strQuery = JSON.stringify(query);
-    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery})");
-    // eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY + ": strQuery})");
-    print("New tag created with name " + tag);
-    addQueryToShell(tag);
+    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ": tag, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
+    log("New tag created with name " + tag);
+    addQueryToShell(tag, true);
 };
 
 
@@ -96,12 +126,20 @@ var welcomeMessage = "You can now use following functions \n\n"
     + "  - tag : String tag of the already stored query \n"
     + "  - params : JSON params to pass to query (eg. {'name' : 'John', 'age' : 52 })\n \n"
 
-    + "addTaggedQuery(tag, query, onCollection, desciption, overwrite) \n"
+    + "addTaggedQuery(tag, query, desciption, overwrite) \n"
+    + "  - tag:\t String tag to be used for indentifying the query \n"
+    + "  - query:\t JSON query \n"
+    + "  - description:\t a line of text on the query \n"
+    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n"
+    + "    You can have parameterized queries with prepending % at the start of the parameter \n"
+    + "    (eg. addTaggedQuery('findByName',{'name' : '%name'})) \n\n"
+
+    + "addTaggedQueryForCollection(tag, query, onCollection, desciption, overwrite) \n"
     + "  - tag:\t String tag to be used for indentifying the query \n"
     + "  - query:\t JSON query \n"
     + "  - onCollection:\t to be run on collection \n"
     + "  - description:\t a line of text on the query \n"
-    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n"            
+    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n"
     + "    You can have parameterized queries with prepending % at the start of the parameter \n"
     + "    (eg. addTaggedQuery('findByName',{'name' : '%name'})) \n\n"
 
