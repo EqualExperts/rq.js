@@ -1,12 +1,13 @@
 load('json2.js');
 
 var QUERY_COLLECTION = "rquery";
+var PARAM = '%';
+
+//properties in the query document
 var DESCRIPTION = "desc";
 var TAG = "tag";
 var QUERY = "query";
 var QUERY_ON_COLLECTION = "onCollection";
-var PARAM = '%';
-var BATCH_SIZE = 10;
 
 var SHELL = this;
 
@@ -25,14 +26,13 @@ var init = function () {
         addQueryToShell(tag);
         print(tag);
         if (desciption != undefined && desciption != null)
-            print("\t- " + desciption);
+            print(":\t- " + desciption);
     }
     print("Done.");
 };
 
 var findWithTag = function (tag, param) {
     var doc = eval("db.getCollection(QUERY_COLLECTION).findOne({ " + TAG + ":tag})");
-    // print("query = " + doc[QUERY]);
     if (doc == null) {
         print("No query tagged: " + tag);
         return;
@@ -41,12 +41,10 @@ var findWithTag = function (tag, param) {
     var command = constructQueryString(doc, param);
     print(command);
     var cursor = eval(command);
-    var count = 0;
     if (!cursor.hasNext())
-        print("0 documentes found with matching criteria : " + strQuery);
-    while (cursor.hasNext() && count < BATCH_SIZE) {
+        print("0 documents found with matching criteria : " + command);
+    while (cursor.hasNext()) {
         printjson(cursor.next());
-        count++;
     }
 };
 
@@ -56,7 +54,7 @@ var constructQueryString = function (queryDoc, param) {
     var onCollection = queryDoc[QUERY_ON_COLLECTION];
     var strQuery = JSON.stringify(query);  
     return "db.getCollection('" + onCollection + "').find(" + strQuery + ")";      
-}
+};
 
 var substitueParam = function (jsonObject, param) {
     for (var key in jsonObject) {
@@ -99,8 +97,7 @@ var clearTaggedQueries = function () {
 // addTaggedQuery("findById", "{'_id': '" + PARAM + "id'}");
 
 var welcomeMessage = "You can now use following functions \n\n"
-    + "findWithTag(collection, tag, params) \n"
-    + "  - collection : String collection on which you want the query to be fired \n"
+    + "findWithTag(tag, params) \n"
     + "  - tag : String tag of the already stored query \n"
     + "  - params : JSON params to pass to query (eg. {'name' : 'John', 'age' : 52 })\n \n"
 
