@@ -40,12 +40,7 @@ var findWithTag = function (tag, param) {
 
     var command = constructQueryString(doc, param);
     print(command);
-    var cursor = eval(command);
-    if (!cursor.hasNext())
-        print("0 documents found with matching criteria : " + command);
-    while (cursor.hasNext()) {
-        printjson(cursor.next());
-    }
+    return eval(command);
 };
 
 var constructQueryString = function (queryDoc, param) {
