@@ -100,7 +100,7 @@ var addTaggedQueryForCollection = function (tag, query, onCollection, descriptio
     var strQuery = JSON.stringify(query);
     eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
     // eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY + ": strQuery})");
-    log("New tag created with name " + tag + " for collection " + collection);
+    log("New tag created with name " + tag + " for collection " + onCollection);
     addQueryToShell(tag);
 };
 
