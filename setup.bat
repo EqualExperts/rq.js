@@ -4,6 +4,8 @@ set HOME=%HOMEDRIVE%%HOMEPATH%
 set MONGORC=.mongorc.js
 set RQ_JS=rq.js
 set JSON2_JS=json2.js
+set RQ_EVAL_SCRIPT=eval("load('%RQ_DIR%rq.js')") 
+set JSON_EVAL_SCRIPT=eval("load('%RQ_DIR%json2.js')") 
 echo Checking "%HOME%\%MONGORC%"
 if not exist "%HOME%\%MONGORC%" (goto :createMongoRC) else (goto:fileFound)
 
@@ -24,10 +26,11 @@ goto addScript
 )
 
 :addScript
-echo eval("load('%RQ_JS%')") >> "%HOME%\%MONGORC%"
-echo eval("load('%JSON2_JS%')") >> "%HOME%\%MONGORC%"
-echo Copying files to %HOME%
-goto copyFiles
+set loadRQ=%RQ_EVAL_SCRIPT:\=/%
+set loadJSON=%JSON_EVAL_SCRIPT:\=/%
+echo %loadRQ% >> "%HOME%\%MONGORC%"
+echo %loadJSON% >> "%HOME%\%MONGORC%"
+goto :done
 
 :copyFiles
 echo copying %RQ_JS%

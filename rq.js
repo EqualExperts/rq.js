@@ -102,21 +102,23 @@ var addTaggedQueryForCollection = function (tag, query, onCollection, descriptio
     addQueryToShell(tag);
 };
 
-var checkForExistingTag = function (tag, overwrite) {
+var checkForExistingTag = function (tag) {
     var existingQuery = eval("db.getCollection(QUERY_COLLECTION).findOne({" + TAG + ":tag})");
     if (existingQuery && existingQuery != null) {
-        if (overwrite == undefined || overwrite == false) {
-            log("Query tagged " + tag + " is already present.");
-            return
-        }
-        else if (overwrite != undefined && overwrite == true)
-            log("Query tagged " + tag + " will be redefined");
-        eval("db.getCollection(QUERY_COLLECTION).remove({" + TAG + ":tag})");
+        log("Query tagged " + tag + " is already present.");
+        return true;
     }
+    return false;
 }
 
 var addTaggedQuery = function (tag, query, description, overwrite) {
-    checkForExistingTag(tag, overwrite);
+    var alreadyExists = checkForExistingTag(tag);
+    if (alreadyExists == true && (overwrite == undefined || overwrite == false))
+        return;
+
+    log("Query tagged " + tag + " will be redefined");
+    eval("db.getCollection(QUERY_COLLECTION).remove({" + TAG + ":tag})");
+
     var strQuery = JSON.stringify(query);
     eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ": tag, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
     log("New tag created with name " + tag);
