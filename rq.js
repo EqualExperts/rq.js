@@ -72,7 +72,7 @@ var getQueryDocument = function (tag) {
 }
 var constructQueryString = function (queryDoc, param, onCollection) {
     var json = JSON.parse(queryDoc[QUERY]);
-    var query = '';
+    var query = json;
     if (param && param != null)
         query = substitueParam(json, param);
     if (!onCollection || onCollection == null)
