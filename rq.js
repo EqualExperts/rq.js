@@ -1,5 +1,3 @@
-load('json2.js');
-
 var QUERY_COLLECTION = "rquery";
 var PARAM = '%';
 var DEBUG = true;
@@ -44,7 +42,7 @@ var init = function () {
             addQueryToShell(tag, false);
         print(tag);
         if (desciption != undefined && desciption != null)
-            print(":\t- " + desciption);
+            print("\t- " + desciption);
         print("");
     }
     print("Done.");
