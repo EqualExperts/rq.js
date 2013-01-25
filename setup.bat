@@ -28,6 +28,7 @@ goto addScript
 :addScript
 set loadRQ=%RQ_EVAL_SCRIPT:\=/%
 set loadJSON=%JSON_EVAL_SCRIPT:\=/%
+echo. >> "%HOME%\%MONGORC%"
 echo %loadRQ% >> "%HOME%\%MONGORC%"
 echo %loadJSON% >> "%HOME%\%MONGORC%"
 goto :done
