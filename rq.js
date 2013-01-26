@@ -130,6 +130,10 @@ var clearTaggedQueries = function () {
     eval("db.getCollection(QUERY_COLLECTION).remove()");
 }
 
+var listTaggedQueries = function(){
+     eval("db.getCollection(QUERY_COLLECTION).find()");
+}
+
 // addTaggedQuery("findById", "{'_id': '" + PARAM + "id'}");
 
 var welcomeMessage = "You can now use following functions \n\n"
@@ -138,15 +142,13 @@ var welcomeMessage = "You can now use following functions \n\n"
     + "  - params : JSON params to pass to query (eg. {'name' : 'John', 'age' : 52 })\n"
     + "  - onCollection (optional) : to be run on collection\n \n"
 
-    + "addTaggedQuery(tag, query, desciption, overwrite) \n"
+    + "addTaggedQuery(tag, query, description, overwrite) \n"
     + "  - tag:\t String tag to be used for indentifying the query \n"
     + "  - query:\t JSON query \n"
     + "  - description:\t a line of text on the query \n"
-    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n"
-    + "    You can have parameterized queries with prepending % at the start of the parameter \n"
-    + "    (eg. addTaggedQuery('findByName',{'name' : '%name'})) \n\n"
+    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n\n"
 
-    + "addTaggedQueryForCollection(tag, query, onCollection, desciption, overwrite) \n"
+    + "addTaggedQueryForCollection(tag, query, onCollection, description, overwrite) \n"
     + "  - tag:\t String tag to be used for indentifying the query \n"
     + "  - query:\t JSON query \n"
     + "  - onCollection:\t to be run on collection \n"
