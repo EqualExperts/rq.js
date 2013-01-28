@@ -88,20 +88,21 @@ var substitueParam = function (jsonObject, param) {
 };
 
 var addTaggedQueryForCollection = function (tag, query, onCollection, description, overwrite) {
-    checkForExistingTag(tag, overwrite);
-    var strQuery = JSON.stringify(query);
-    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
-    log("New tag created with name " + tag + " for collection " + onCollection);
-    addQueryToShell(tag);
+    var canOverwrite = overwrite || false;
+    var addTag = checkForExistingTag(tag) ? canOverwrite : true;
+    if (addTag) {
+        eval("db.getCollection(QUERY_COLLECTION).remove({" + TAG + ":tag})");
+        var strQuery = JSON.stringify(query);
+        eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
+        log("New tag created with name " + tag + " for collection " + onCollection);
+        addQueryToShell(tag);
+    } else {
+        log("A query tagged " + tag + " is already present, and will not be replaced unless specified");
+    }
 };
 
 var checkForExistingTag = function (tag) {
-    var existingQuery = eval("db.getCollection(QUERY_COLLECTION).findOne({" + TAG + ":tag})");
-    if (existingQuery && existingQuery != null) {
-        log("Query tagged " + tag + " is already present.");
-        return true;
-    }
-    return false;
+    return eval("db.getCollection(QUERY_COLLECTION).findOne({" + TAG + ":tag})");
 }
 
 var addTaggedQuery = function (tag, query, description, overwrite) {
