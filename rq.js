@@ -16,10 +16,6 @@ var log = function (message) {
     }
 }
 
-var setDebugTrue = function () {
-    DEBUG = false;
-}
-
 var addQueryToShell = function (tag, acceptCollection) {
     if (acceptCollection == true)
         eval(tag + " =  function (collection, param) {return findWithTag('" + tag + "', param, collection); }");
