@@ -16,11 +16,8 @@ var log = function (message) {
     }
 }
 
-var addQueryToShell = function (tag, acceptCollection) {
-    if (acceptCollection == true)
-        eval(tag + " =  function (collection, param) {return findWithTag('" + tag + "', param, collection); }");
-    else
-        eval(tag + " =  function ( param) {return findWithTag( '" + tag + "', param); }");
+var addQueryToShell = function (tag) {
+    eval(tag + " =  function (collection, param) {return findWithTag('" + tag + "', param, collection); }");
 }
 
 var init = function () {
@@ -32,15 +29,12 @@ var init = function () {
         var tag = taggedQuery[TAG];
         var description = taggedQuery[DESCRIPTION];
         var onCollection = taggedQuery[QUERY_ON_COLLECTION];
-        if (!onCollection || onCollection == null)
-            addQueryToShell(tag, true);
-        else
-            addQueryToShell(tag, false);
+        addQueryToShell(tag);
         var tagAndDescription = (description) ? tag + "\t- " + description : tag;
-        print(tagAndDescription);
-        print("");
+        log(tagAndDescription);
+        log("");
     }
-    print("Done.");
+    log("Done.");
 };
 
 var findWithTag = function (tag, param, collection) {
@@ -105,21 +99,6 @@ var checkForExistingTag = function (tag) {
     return eval("db.getCollection(QUERY_COLLECTION).findOne({" + TAG + ":tag})");
 }
 
-var addTaggedQuery = function (tag, query, description, overwrite) {
-    var alreadyExists = checkForExistingTag(tag);
-    if (alreadyExists == true && (overwrite == undefined || overwrite == false))
-        return;
-
-    log("Query tagged " + tag + " will be redefined");
-    eval("db.getCollection(QUERY_COLLECTION).remove({" + TAG + ":tag})");
-
-    var strQuery = JSON.stringify(query);
-    eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ": tag, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
-    log("New tag created with name " + tag);
-    addQueryToShell(tag, true);
-};
-
-
 var clearTaggedQueries = function () {
     eval("db.getCollection(QUERY_COLLECTION).remove()");
 }
@@ -133,13 +112,7 @@ var welcomeMessage = "You can now use following functions: \n\n"
     + "  - params : JSON params to pass to query (eg. {'name' : 'John', 'age' : 52 })\n"
     + "  - onCollection (optional) : to be run on collection\n \n"
 
-    + "addTaggedQuery(tag, query, description, overwrite) \n"
-    + "  - tag:\t String tag to be used for indentifying the query \n"
-    + "  - query:\t JSON query \n"
-    + "  - description:\t a line of text on the query \n"
-    + "  - overwrite:\t confirm if the existing query for the tag should be overwritten \n\n"
-
-    + "addTaggedQueryForCollection(tag, query, onCollection, description, overwrite) \n"
+    + "addTaggedQueryForCollection(tag, query, onCollection, desciption, overwrite) \n"
     + "  - tag:\t String tag to be used for indentifying the query \n"
     + "  - query:\t JSON query \n"
     + "  - onCollection:\t to be run on collection \n"
