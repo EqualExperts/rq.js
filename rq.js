@@ -26,19 +26,18 @@ var addQueryToShell = function (tag, acceptCollection) {
 var init = function () {
     var query = "db.getCollection(QUERY_COLLECTION).find({})";
     var cursor = eval(query);
-    print("\nStored tagged queries:\n");
+    log("Stored tagged queries:");
     while (cursor.hasNext()) {
         var taggedQuery = cursor.next();
         var tag = taggedQuery[TAG];
-        var desciption = taggedQuery[DESCRIPTION];
+        var description = taggedQuery[DESCRIPTION];
         var onCollection = taggedQuery[QUERY_ON_COLLECTION];
         if (!onCollection || onCollection == null)
             addQueryToShell(tag, true);
         else
             addQueryToShell(tag, false);
-        print(tag);
-        if (desciption != undefined && desciption != null)
-            print("\t- " + desciption);
+        var tagAndDescription = (description) ? tag + "\t- " + description : tag;
+        print(tagAndDescription);
         print("");
     }
     print("Done.");
@@ -78,7 +77,6 @@ var constructQueryString = function (queryDoc, param, onCollection) {
 var substitueParam = function (jsonObject, param) {
     for (var key in jsonObject) {
         var value = jsonObject[key];
-        //  printjson({"key": key, "value": value});
         if (typeof value == "object")
             jsonObject[key] = substitueParam(value, param);
         else if (value.toString().indexOf(PARAM) == 0) {
@@ -93,7 +91,6 @@ var addTaggedQueryForCollection = function (tag, query, onCollection, descriptio
     checkForExistingTag(tag, overwrite);
     var strQuery = JSON.stringify(query);
     eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY_ON_COLLECTION + ":onCollection, " + QUERY + ": strQuery, " + DESCRIPTION + " : description})");
-    // eval("db.getCollection(QUERY_COLLECTION).insert({" + TAG + ":tag, " + QUERY + ": strQuery})");
     log("New tag created with name " + tag + " for collection " + onCollection);
     addQueryToShell(tag);
 };
@@ -129,10 +126,7 @@ var clearTaggedQueries = function () {
 var listTaggedQueries = function(){
      eval("db.getCollection(QUERY_COLLECTION).find()");
 }
-
-// addTaggedQuery("findById", "{'_id': '" + PARAM + "id'}");
-
-var welcomeMessage = "You can now use following functions \n\n"
+var welcomeMessage = "You can now use following functions: \n\n"
     + "findWithTag(tag, params, onCollection) \n"
     + "  - tag : String tag of the already stored query \n"
     + "  - params : JSON params to pass to query (eg. {'name' : 'John', 'age' : 52 })\n"
@@ -154,6 +148,7 @@ var welcomeMessage = "You can now use following functions \n\n"
     + "    (eg. addTaggedQuery('findByName',{'name' : '%name'})) \n\n"
 
     + "clearTaggedQueries() \n"
+    + " - remove all queries tagged in this database\n";
 
-print(welcomeMessage);
+log(welcomeMessage);
 init();
